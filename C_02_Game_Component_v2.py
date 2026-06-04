@@ -1,8 +1,7 @@
 import random
 from tkinter import *
 from functools import partial  # To prevent unwanted windows
-
-from quiz_data_00 import quiz_data
+from Quiz_Data import quiz_data
 
 
 def get_round_questions(how_many):
@@ -25,13 +24,19 @@ def get_round_questions(how_many):
 def get_question_options(question):
     """
     Builds a shuffled list of 4 answer options for the given question.
-    Always includes the correct answer plus 3 wrong answers.
+    Always includes the correct answer plus 3 randomly chosen wrong answers
+    drawn from the full capitals pool so every game has different distractors.
     :param question: a single question entry from quiz_data
     :return: shuffled list of 4 answer strings
     """
 
     correct = question[1]
-    wrong_answers = question[2]
+
+    # Build a pool of all capitals except the correct one
+    all_capitals = [entry[1] for entry in quiz_data if entry[1] != correct]
+
+    # Pick 3 random wrong answers from the pool
+    wrong_answers = random.sample(all_capitals, 3)
 
     # Build the options list and shuffle so correct answer isn't always first
     options = [correct] + wrong_answers
@@ -166,7 +171,7 @@ class Play:
         # Button details (frame | text | bg | command | width | row | column)
         control_button_list = [
             [self.game_frame, "Next Round", "#0057D8", self.new_round, 21, 7, None],
-            [self.hints_stats_frame, "Hints", "#FF8000", self.use_hint, 16, 0, 0],
+            [self.hints_stats_frame, "50:50🍀", "#FF8000", self.use_hint, 16, 0, 0],
             [self.hints_stats_frame, "Stats", "#333333", "", 16, 0, 1],
             [self.game_frame, "End Game", "#990000", self.close_play, 21, 9, None]
         ]

@@ -45,18 +45,18 @@ class Play:
 
     def __init__(self, how_many):
         self.play_box = Toplevel()
-        self.play_box.title("Capital Cities Quiz")
+        self.play_box.title("Country Capital Quiz")
 
         self.game_frame = Frame(self.play_box)
         self.game_frame.grid(padx=10, pady=10)
 
-        self.heading_label = Label(self.game_frame, text="Capital Cities Quiz",
+        self.heading_label = Label(self.game_frame, text="Country Capital Quiz",
                                    font=("Arial", 16, "bold"), padx=5, pady=5)
         self.heading_label.grid(row=0)
 
         # Hints button - launches the DisplayHints class
         self.hints_button = Button(self.game_frame, font=("Arial", 14, "bold"),
-                                   text="Hints", width=15, fg="#FFFFFF",
+                                   text="50:50", width=15, fg="#FFFFFF",
                                    bg="#FF8000", padx=10, pady=10,
                                    command=self.to_hints)
         self.hints_button.grid(row=1)
@@ -78,7 +78,7 @@ class DisplayHints:
         # Setup dialogue box
         background = "#ffe6cc"
         self.help_box = Toplevel()
-        self.help_box.title("Hints / Help")
+        self.help_box.title("Help/50:50")
 
         # Disable hints button while help is open
         partner.hints_button.config(state=DISABLED)

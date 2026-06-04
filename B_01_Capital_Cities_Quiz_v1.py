@@ -1,8 +1,7 @@
 import random
 from tkinter import *
 from functools import partial  # To prevent unwanted windows
-
-from quiz_data_00 import quiz_data
+from Quiz_Data import quiz_data
 
 
 # Helper functions go here
@@ -25,13 +24,19 @@ def get_round_questions(how_many):
 def get_question_options(question):
     """
     Builds a shuffled list of 4 answer options for the given question.
-    Always includes the correct answer plus 3 wrong answers.
+    Always includes the correct answer plus 3 randomly chosen wrong answers
+    drawn from the full capitals pool so every game has different distractors.
     :param question: a single question entry from quiz_data
     :return: shuffled list of 4 answer strings
     """
 
     correct = question[1]
-    wrong_answers = question[2]
+
+    # Build a pool of all capitals except the correct one
+    all_capitals = [entry[1] for entry in quiz_data if entry[1] != correct]
+
+    # Pick 3 random wrong answers from the pool
+    wrong_answers = random.sample(all_capitals, 3)
 
     # Combine correct answer with wrong answers then shuffle
     options = [correct] + wrong_answers
@@ -61,17 +66,17 @@ class StartGame:
                         "You have to complete the game and you decide the amount of "
                         "rounds/games you want to play.\n\n"
                         "Correct Answer: +10 points\n"
-                        "Correct Answer using hint: +4 points\n"
+                        "Correct Answer using 50/50: +4 points\n"
                         "False Answer: -3 points\n"
-                        "False Answer using hint: -5 points\n\n"
-                        "(Hints give more opportunity to get it right, "
+                        "False Answer using 50/50: -5 points\n\n"
+                        "(The 50/50 component gives more opportunity to answer the question correctly, "
                         "so wrong answers using them cost more!)")
 
         choose_string = "How many rounds do you want to play?"
 
         # List of labels to be made (text | font | fg)
         start_labels_list = [
-            ["Capital Cities Quiz \U0001f30d", ("Arial", 16, "bold"), None],
+            ["Country Capital Quiz \U0001f30d", ("Arial", 16, "bold"), None],
             [intro_string, ("Arial", 12), None],
             [choose_string, ("Arial", 12, "bold"), "#009900"]
         ]
@@ -159,14 +164,12 @@ class Play:
         self.rounds_wanted = IntVar()
         self.rounds_wanted.set(how_many)
 
-        self.rounds_won = IntVar()
-        self.rounds_won.set(0)
-
         self.user_score = IntVar()
         self.user_score.set(0)
 
-        # Lists to track round scores
-        self.all_scores_list = []
+        # Counters for stats
+        self.correct_count = 0
+        self.wrong_count = 0
 
         # Retrieve question list for this game
         self.question_list = get_round_questions(how_many)
@@ -175,7 +178,7 @@ class Play:
         self.hint_used = False
 
         self.play_box = Toplevel()
-        self.play_box.title("Capital Cities Quiz")
+        self.play_box.title("Country Capital Quiz")
 
         self.game_frame = Frame(self.play_box)
         self.game_frame.grid(padx=10, pady=10)
@@ -187,7 +190,7 @@ class Play:
         play_labels_list = [
             ["Round # of #", ("Arial", "16", "bold"), None, 0],
             ["Score: 0", body_font, "#FFF2CC", 1],
-            ["What is the capital of... Good luck! \U0001f30d", body_font, "#D5E8D4", 2],
+            ["Choose A Capital City Below... Good luck! \U0001f30d", body_font, "#D5E8D4", 2],
             ["You chose... result will appear here", body_font, "#D5E8D4", 5]
         ]
 
@@ -242,7 +245,7 @@ class Play:
         # Button details (frame | text | bg | command | width | row | column)
         control_button_list = [
             [self.game_frame, "Next Round", "#0057D8", self.new_round, 21, 7, None],
-            [self.hints_stats_frame, "Hints", "#FF8000", self.to_hints, 16, 0, 0],
+            [self.hints_stats_frame, "50/50", "#FF8000", self.to_hints, 16, 0, 0],
             [self.hints_stats_frame, "Stats", "#333333", self.to_stats, 16, 0, 1],
             [self.game_frame, "End Game \U0001f30d", "#990000", self.close_play, 21, 9, None]
         ]
@@ -333,9 +336,8 @@ class Play:
             result_bg = "#82B366"
             current_score += points
 
-            # Track rounds won
-            rounds_won = self.rounds_won.get()
-            self.rounds_won.set(rounds_won + 1)
+            # Track correct answers
+            self.correct_count += 1
 
         else:
             # Wrong answer - deduct points (more if hint was used)
@@ -351,6 +353,9 @@ class Play:
             result_bg = "#F8CECC"
             current_score -= points
 
+            # Track wrong answers
+            self.wrong_count += 1
+
             # Highlight the correct answer button in green
             for count, item in enumerate(self.answer_button_ref):
                 if self.current_options[count] == correct_answer:
@@ -360,9 +365,6 @@ class Play:
         self.user_score.set(current_score)
         self.score_label.config(text=f"Score: {current_score}")
         self.results_label.config(text=result_text, bg=result_bg)
-
-        # Add score to list for stats
-        self.all_scores_list.append(current_score)
 
         # Disable all answer buttons and hint button
         for item in self.answer_button_ref:
@@ -421,9 +423,10 @@ class Play:
         Retrieves everything needed to display the game statistics
         """
 
-        # Retrieve rounds won as a number (not the IntVar container)
-        rounds_won = self.rounds_won.get()
-        stats_bundle = [rounds_won, self.all_scores_list]
+        final_score = self.user_score.get()
+        rounds_played = self.rounds_played.get()
+        stats_bundle = [final_score, self.correct_count,
+                        self.wrong_count, rounds_played]
 
         Stats(self, stats_bundle)
 
@@ -444,8 +447,10 @@ class Stats:
     def __init__(self, partner, all_stats_info):
 
         # Extract information from the stats bundle
-        rounds_won = all_stats_info[0]
-        user_scores = all_stats_info[1]
+        final_score    = all_stats_info[0]
+        correct_count  = all_stats_info[1]
+        wrong_count    = all_stats_info[2]
+        rounds_played  = all_stats_info[3]
 
         self.stats_box = Toplevel()
         self.stats_box.title("Game Statistics")
@@ -460,48 +465,45 @@ class Stats:
         self.stats_frame = Frame(self.stats_box, width=300, height=200)
         self.stats_frame.grid()
 
-        # Maths to calculate stats figures
-        rounds_played = len(user_scores)
-        total_score = sum(user_scores)
-        best_score = max(user_scores)
-        average_score = total_score / rounds_played
-
+        # Calculate accuracy
         if rounds_played > 0:
-            success_rate = rounds_won / rounds_played * 100
+            accuracy = correct_count / rounds_played * 100
         else:
-            success_rate = 0
+            accuracy = 0
 
         # Build stats strings
-        success_string = (f"Success Rate: {rounds_won} / {rounds_played} "
-                          f"({success_rate:.0f}%)")
-        total_score_string = f"Total Score: {total_score}"
-        best_score_string = f"Best Round Score: {best_score}"
-        average_score_string = f"Average Score Per Round: {average_score:.0f}"
+        final_score_string   = f"Final Score:       {final_score}"
+        correct_string       = f"Correct Answers:   {correct_count}"
+        wrong_string         = f"Wrong Answers:     {wrong_count}"
+        accuracy_string      = f"Accuracy:          {accuracy:.0f}%"
 
-        # Custom comment based on performance
-        if rounds_won == rounds_played:
-            comment_string = "Amazing! You got every single round correct!"
+        # Custom comment based on accuracy
+        if accuracy == 100:
+            comment_string = "Amazing! You got every single question correct!"
             comment_colour = "#D5E8D4"
 
-        elif rounds_won == 0:
-            comment_string = ("Oops - you didn't win any rounds! "
+        elif accuracy == 0:
+            comment_string = ("Oops - you didn't get any correct! "
                               "Try using the 50/50 Hints next time!")
             comment_colour = "#F8CECC"
-            best_score_string = "Best Round Score: n/a"
 
         else:
-            comment_string = (f"Well done - you won {rounds_won} "
-                              f"out of {rounds_played} rounds!")
+            comment_string = (f"Well done - {correct_count} correct out of "
+                              f"{rounds_played} questions ({accuracy:.0f}%)!")
             comment_colour = "#FFF2CC"
+
+        heading_font = ("Arial", 16, "bold")
+        normal_font  = ("Arial", 14)
+        comment_font = ("Arial", 13)
 
         # Label list (text | font | sticky)
         all_stats_strings = [
-            ["Statistics", ("Arial", 16, "bold"), ""],
-            [success_string, ("Arial", 14), "W"],
-            [total_score_string, ("Arial", 14), "W"],
-            [best_score_string, ("Arial", 14), "W"],
-            [average_score_string, ("Arial", 14), "W"],
-            [comment_string, ("Arial", 13), "W"],
+            ["Statistics",      heading_font, ""],
+            [final_score_string,  normal_font, "W"],
+            [correct_string,      normal_font, "W"],
+            [wrong_string,        normal_font, "W"],
+            [accuracy_string,     normal_font, "W"],
+            [comment_string,     comment_font, "W"],
         ]
 
         stats_label_ref_list = []
@@ -534,6 +536,6 @@ class Stats:
 # main routine
 if __name__ == "__main__":
     root = Tk()
-    root.title("Capital Cities Quiz")
+    root.title("Country Capital Quiz")
     StartGame()
     root.mainloop()
