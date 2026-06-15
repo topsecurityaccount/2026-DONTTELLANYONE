@@ -1,7 +1,7 @@
 import random
 from tkinter import *
 from functools import partial  # To prevent unwanted windows
-from Quiz_Data import quiz_data
+from C_05_Get_All_Capital_Cities_v1 import quiz_data
 
 
 def get_round_questions(how_many):
@@ -241,7 +241,7 @@ class Play:
         # Get the answer the user chose
         chosen_answer = self.current_options[user_choice]
         correct_answer = self.current_question[1]
-        country_fact = self.current_question[3]
+        country_fact = self.current_question[2]
 
         # Retrieve current score
         current_score = self.user_score.get()

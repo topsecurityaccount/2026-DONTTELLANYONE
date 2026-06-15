@@ -1,7 +1,7 @@
 import random
 from tkinter import *
 from functools import partial  # To prevent unwanted windows
-from Quiz_Data import quiz_data
+from C_05_Get_All_Data_v1 import quiz_data
 
 
 # Helper functions go here
@@ -76,7 +76,7 @@ class StartGame:
 
         # List of labels to be made (text | font | fg)
         start_labels_list = [
-            ["Country Capital Quiz \U0001f30d", ("Arial", 16, "bold"), None],
+            ["Country Capitals🌍", ("Arial", 16, "bold"), None],
             [intro_string, ("Arial", 12), None],
             [choose_string, ("Arial", 12, "bold"), "#009900"]
         ]
@@ -178,7 +178,7 @@ class Play:
         self.hint_used = False
 
         self.play_box = Toplevel()
-        self.play_box.title("Country Capital Quiz")
+        self.play_box.title("Country Capitals")
 
         self.game_frame = Frame(self.play_box)
         self.game_frame.grid(padx=10, pady=10)
@@ -190,7 +190,7 @@ class Play:
         play_labels_list = [
             ["Round # of #", ("Arial", "16", "bold"), None, 0],
             ["Score: 0", body_font, "#FFF2CC", 1],
-            ["Choose A Capital City Below... Good luck! \U0001f30d", body_font, "#D5E8D4", 2],
+            ["The capital is... Good luck! \U0001f30d", body_font, "#D5E8D4", 2],
             ["You chose... result will appear here", body_font, "#D5E8D4", 5]
         ]
 
@@ -245,7 +245,7 @@ class Play:
         # Button details (frame | text | bg | command | width | row | column)
         control_button_list = [
             [self.game_frame, "Next Round", "#0057D8", self.new_round, 21, 7, None],
-            [self.hints_stats_frame, "50/50", "#FF8000", self.to_hints, 16, 0, 0],
+            [self.hints_stats_frame, "50:50🍀", "#FF8000", self.to_hints, 16, 0, 0],
             [self.hints_stats_frame, "Stats", "#333333", self.to_stats, 16, 0, 1],
             [self.game_frame, "End Game \U0001f30d", "#990000", self.close_play, 21, 9, None]
         ]
@@ -293,7 +293,7 @@ class Play:
 
         # Update country label with the question
         self.country_label.config(
-            text=f"What is the capital of {self.current_question[0]}?")
+            text=f"{self.current_question[0]}")
 
         # Clear hint label and reset results label
         self.hint_label.config(text="")
