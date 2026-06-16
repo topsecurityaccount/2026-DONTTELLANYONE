@@ -1,7 +1,7 @@
 import random
 from tkinter import *
 from functools import partial  # To prevent unwanted windows
-from C_05_Get_All_Capital_Cities_v1 import quiz_data
+from C_05_Get_All_Data_v1 import quiz_data
 
 
 def get_round_questions(how_many):

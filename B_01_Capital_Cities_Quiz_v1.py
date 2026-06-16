@@ -395,7 +395,7 @@ class Play:
             return
 
         # Update hint label to inform user about 50/50
-        self.hint_label.config(text="50/50! Two wrong answers have been removed. "
+        self.hint_label.config(text="50:50! Two wrong answers have been removed. "
                                     "You now have a 50/50 chance of getting it right. "
                                     "Good luck! \U0001f3af")
 
@@ -536,6 +536,6 @@ class Stats:
 # main routine
 if __name__ == "__main__":
     root = Tk()
-    root.title("Country Capital Quiz")
+    root.title("Country Capitals")
     StartGame()
     root.mainloop()
